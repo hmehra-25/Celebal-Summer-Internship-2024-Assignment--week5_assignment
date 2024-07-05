@@ -1,0 +1,61 @@
+Task 1 :- Copy data from Database to CSV,Parquet and Avro File Format
+
+import pandas as pd
+import mysql.connector
+from sqlalchemy import create_engine
+import pyarrow as pa
+import pyarrow.parquet as pq
+import fastavro
+
+db_config = {
+    'user': 'root',
+    'password': 'user123',
+    'host': '127.0.0.1',
+    'database': 'w3schools',
+}
+
+query = "SELECT * FROM w3schools.customers"
+
+connection = mysql.connector.connect(**db_config)
+df = pd.read_sql(query, connection)
+connection.close()
+
+df.to_csv('D:\EXPORT LOCATION\customers.csv', index=False)
+
+table = pa.Table.from_pandas(df)
+pq.write_table(table, 'D:\EXPORT LOCATION\customers.parquet')
+
+schema = {
+    "type": "record",
+    "name": "customers",
+    "fields": [{"name": col, "type": "string"} for col in df.columns]
+}
+
+records = df.to_dict('records')
+with open('D:\EXPORT LOCATION\customers.avro', 'wb') as out:
+    fastavro.writer(out, schema, records)
+
+print("Data has been saved to CSV, Parquet, and Avro formats.")
+
+
+Task 3 :- Copy all the tables from one database to another
+
+select * into copy_tables.dbo.employee1 from harshaldb.dbo.employee1;
+select * into copy_tables.dbo.department from harshaldb.dbo.department;
+select * into copy_tables.dbo.products from harshaldb.dbo.products;
+select * into copy_tables.dbo.quantitys from harshaldb.dbo.quantitys;
+select * into copy_tables.dbo.student from harshaldb.dbo.student;
+select * into copy_tables.dbo.targets from harshaldb.dbo.targets;
+select * into copy_tables.dbo.tb1productsales from harshaldb.dbo.tb1productsales;
+
+Task 4 :- Copy selective tables with selective columns from one database to another
+
+create database selective_table;
+
+select id,name,salary into selective_table.dbo.employees from harshaldb.dbo.employee1;
+
+select deptid,deptname into selective_table.dbo.department from harshaldb.dbo.department;
+
+select id,name into selective_table.dbo.student from harshaldb.dbo.student;
+
+select productsalesid,quantitysold into selective_table.dbo.productsales from harshaldb.dbo.tb1productsales;
